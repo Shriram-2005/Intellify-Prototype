@@ -22,7 +22,9 @@ export const Navbar: React.FC = () => {
     <>
       <StaggeredMenu
         position="right"
+        // @ts-expect-error - StaggeredMenu.jsx infers never[] from default empty array
         items={menuItems}
+        // @ts-expect-error - StaggeredMenu.jsx infers never[] from default empty array
         socialItems={socialItems}
         displaySocials
         displayItemNumbering={true}
