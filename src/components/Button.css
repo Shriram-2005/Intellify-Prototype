@@ -41,3 +41,13 @@
 .intellify-btn--full-width {
   width: 100%;
 }
+
+.intellify-btn--outline {
+  background-color: transparent;
+  color: var(--pure-black);
+  border: 1px solid var(--light-gray-border);
+}
+
+.intellify-btn--outline:hover {
+  background-color: var(--off-white);
+}
