@@ -179,6 +179,7 @@ export default function Home() {
           <div className="hero-image">
             <div style={{ height: '450px', position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
               <Carousel 
+                // @ts-expect-error - Carousel.jsx infers string description from DEFAULT_ITEMS but we use JSX
                 items={mockEssays} 
                 baseWidth={400} 
                 autoplay={true} 
