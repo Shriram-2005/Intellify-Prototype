@@ -1,0 +1,29 @@
+<svg width="220" height="60" viewBox="0 0 220 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Stylized Node Network Icon -->
+  <g transform="translate(10, 5)">
+    <!-- Connections -->
+    <path d="M25 25 L10 25" stroke="#3498DB" stroke-width="2"/>
+    <path d="M25 25 L40 25" stroke="#3498DB" stroke-width="2"/>
+    <path d="M25 25 L15 10" stroke="#3498DB" stroke-width="2"/>
+    <path d="M25 25 L35 10" stroke="#3498DB" stroke-width="2"/>
+    <path d="M25 25 L15 40" stroke="#3498DB" stroke-width="2"/>
+    <path d="M25 25 L35 40" stroke="#3498DB" stroke-width="2"/>
+    <path d="M15 10 L35 10" stroke="#3498DB" stroke-width="1.5" opacity="0.5"/>
+    <path d="M10 25 L15 10" stroke="#3498DB" stroke-width="1.5" opacity="0.5"/>
+    <path d="M40 25 L35 10" stroke="#3498DB" stroke-width="1.5" opacity="0.5"/>
+    
+    <!-- Nodes -->
+    <circle cx="10" cy="25" r="4" fill="#3498DB"/>
+    <circle cx="40" cy="25" r="4" fill="#1ABC9C"/>
+    <circle cx="15" cy="10" r="4" fill="#3498DB"/>
+    <circle cx="35" cy="10" r="5" fill="#9B59B6"/>
+    <circle cx="15" cy="40" r="4" fill="#3498DB"/>
+    <circle cx="35" cy="40" r="4" fill="#3498DB"/>
+
+    <!-- Central Pillar -->
+    <path d="M22 15H28V35H22V15Z" fill="#111B29"/>
+    <path d="M18 35H32V42H18V35Z" fill="#111B29"/>
+  </g>
+  <!-- Text -->
+  <text x="65" y="42" font-family="Inter, sans-serif" font-weight="800" font-size="28" fill="#111B29" letter-spacing="-0.5">Intellify.ai</text>
+</svg>

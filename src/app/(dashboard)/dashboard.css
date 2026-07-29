@@ -1,0 +1,111 @@
+/* Dark theme variables are now in globals.css */
+.intellify-dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--off-white);
+  transition: background-color 0.3s ease;
+}
+
+.intellify-dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.intellify-top-header {
+  height: 86px;
+  background-color: var(--pure-white);
+  border-bottom: 1px solid var(--light-gray-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.dashboard-pill-left,
+.dashboard-pill-right {
+  pointer-events: auto;
+}
+
+.dashboard-logo-pill {
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  background: transparent;
+}
+
+.dashboard-logo-link {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--pure-black);
+  text-decoration: none;
+  line-height: 1;
+}
+
+.dashboard-profile-pill {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: transparent;
+}
+
+.profile-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #E74C3C;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.profile-email {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--pure-black);
+}
+
+.profile-plan-badge {
+  background: linear-gradient(135deg, #E74C3C, #96281B);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+}
+
+.dashboard-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  color: var(--pure-black);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 10px 20px;
+  transition: all 0.2s ease;
+  pointer-events: auto;
+  border-radius: 999px;
+}
+
+.dashboard-logout-btn:hover {
+  color: #E74C3C;
+}
+
+.intellify-dashboard-content {
+  padding: 32px;
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}

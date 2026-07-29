@@ -1,0 +1,17 @@
+.intellify-card {
+  background-color: var(--pure-white);
+  border: 1px solid var(--light-gray-border);
+  border-radius: 8px;
+  padding: 24px;
+  color: var(--dark-gray);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.intellify-card--hoverable {
+  cursor: pointer;
+}
+
+.intellify-card--hoverable:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}

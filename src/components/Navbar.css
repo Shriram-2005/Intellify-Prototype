@@ -1,0 +1,66 @@
+.intellify-navbar {
+  background-color: var(--pure-white);
+  border-bottom: 1px solid var(--light-gray-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+.intellify-navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 24px;
+}
+
+.intellify-navbar-logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--pure-black);
+  text-decoration: none;
+}
+
+.intellify-navbar-logo-dot {
+  color: var(--primary-red);
+}
+
+.intellify-navbar-links {
+  display: flex;
+  gap: 32px;
+}
+
+.intellify-navbar-links a {
+  color: var(--pure-black);
+  font-size: 16px;
+  font-weight: 500;
+  position: relative;
+  text-decoration: none;
+}
+
+.intellify-navbar-links a:hover {
+  color: var(--primary-red);
+}
+
+.intellify-navbar-links a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: var(--primary-red);
+  transition: width 0.2s ease;
+}
+
+.intellify-navbar-links a:hover::after {
+  width: 100%;
+}
+
+.intellify-navbar-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}

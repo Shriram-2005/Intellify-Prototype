@@ -1,0 +1,141 @@
+.avatar-test-page {
+  background-color: #000;
+  color: #fff;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.avatar-test-header {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+}
+
+.exit-btn-dark {
+  color: #ccc;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.exit-btn-dark:hover {
+  color: #fff;
+}
+
+.avatar-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.avatar-timer {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-red);
+  font-variant-numeric: tabular-nums;
+}
+
+.avatar-test-main {
+  flex: 1;
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.examiner-view {
+  flex: 3;
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #333;
+}
+
+.student-view {
+  flex: 1;
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #333;
+  max-height: 240px;
+}
+
+.video-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #888;
+}
+
+.video-label {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  background-color: rgba(0,0,0,0.6);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #333;
+  border-top-color: var(--primary-red);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.camera-icon {
+  font-size: 32px;
+}
+
+.avatar-test-controls {
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+}
+
+.control-btn {
+  padding: 16px 32px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mic-btn {
+  background-color: #333;
+  color: #fff;
+}
+
+.mic-btn:hover {
+  background-color: #444;
+}
+
+.end-btn {
+  background-color: var(--primary-red);
+  color: #fff;
+}
+
+.end-btn:hover {
+  background-color: var(--deep-red);
+}

@@ -1,0 +1,43 @@
+.intellify-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 9999px; /* Pill-shaped by default */
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.intellify-btn--primary {
+  background-color: var(--primary-red);
+  color: var(--pure-white);
+}
+
+.intellify-btn--primary:hover {
+  background-color: var(--deep-red);
+}
+
+.intellify-btn--secondary {
+  background-color: var(--pure-white);
+  color: var(--primary-red);
+  border: 1px solid var(--primary-red);
+}
+
+.intellify-btn--secondary:hover {
+  background-color: var(--off-white);
+}
+
+.intellify-btn--ghost {
+  background-color: transparent;
+  color: var(--pure-black);
+}
+
+.intellify-btn--ghost:hover {
+  background-color: var(--off-white);
+}
+
+.intellify-btn--full-width {
+  width: 100%;
+}
