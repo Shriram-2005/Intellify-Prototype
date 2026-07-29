@@ -11,7 +11,7 @@ import '../auth.css';
 export default function Login() {
   const router = useRouter();
 
-  const handleLogin = (e) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     // Simulate login and redirect to dashboard
     router.push('/dashboard');

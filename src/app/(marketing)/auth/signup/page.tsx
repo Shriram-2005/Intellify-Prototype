@@ -11,7 +11,7 @@ import '../auth.css';
 export default function Signup() {
   const router = useRouter();
 
-  const handleSignup = (e) => {
+  const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
     // Simulate signup and redirect to dashboard
     router.push('/dashboard');
