@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
 export default function ListeningIndex() {
-  redirect('/practice/listening/123');
+  redirect('/practice/listening/section-1');
 }

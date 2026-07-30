@@ -25,14 +25,16 @@ export default function ModulesOverview() {
       color: '#3498db',
       icon: <Headphones size={28} color="#3498db" />,
       subStats: [
-        { label: 'Multiple Choice', val: '80%' },
-        { label: 'Map Labeling', val: '50%' },
-        { label: 'Form Completion', val: '70%' }
+        { label: 'Section 1', val: '90%' },
+        { label: 'Section 2', val: '80%' },
+        { label: 'Section 3', val: '60%' },
+        { label: 'Section 4', val: '50%' }
       ],
       chartData: [
-        { name: 'Multiple Choice', score: 80, fill: '#3498db' },
-        { name: 'Map Labeling', score: 50, fill: '#3498db' },
-        { name: 'Form Completion', score: 70, fill: '#3498db' }
+        { name: 'Sec 1', score: 90, fill: '#3498db' },
+        { name: 'Sec 2', score: 80, fill: '#3498db' },
+        { name: 'Sec 3', score: 60, fill: '#3498db' },
+        { name: 'Sec 4', score: 50, fill: '#3498db' }
       ]
     },
     {
@@ -44,14 +46,14 @@ export default function ModulesOverview() {
       color: '#2ecc71',
       icon: <BookOpen size={28} color="#2ecc71" />,
       subStats: [
-        { label: 'True/False/NG', val: '90%' },
-        { label: 'Matching Headings', val: '75%' },
-        { label: 'Summary Compl.', val: '85%' }
+        { label: 'Passage 1', val: '90%' },
+        { label: 'Passage 2', val: '75%' },
+        { label: 'Passage 3', val: '85%' }
       ],
       chartData: [
-        { name: 'T/F/NG', score: 90, fill: '#2ecc71' },
-        { name: 'Matching', score: 75, fill: '#2ecc71' },
-        { name: 'Summary', score: 85, fill: '#2ecc71' }
+        { name: 'Passage 1', score: 90, fill: '#2ecc71' },
+        { name: 'Passage 2', score: 75, fill: '#2ecc71' },
+        { name: 'Passage 3', score: 85, fill: '#2ecc71' }
       ]
     },
     {
@@ -80,14 +82,14 @@ export default function ModulesOverview() {
       color: '#9b59b6',
       icon: <Mic size={28} color="#9b59b6" />,
       subStats: [
-        { label: 'Fluency', val: '7.5' },
-        { label: 'Lexical Resource', val: '6.5' },
-        { label: 'Pronunciation', val: '7.0' }
+        { label: 'Part 1', val: '7.5' },
+        { label: 'Part 2', val: '6.5' },
+        { label: 'Part 3', val: '7.0' }
       ],
       chartData: [
-        { name: 'Fluency', score: 7.5, fill: '#9b59b6' },
-        { name: 'Lexical', score: 6.5, fill: '#9b59b6' },
-        { name: 'Pronunciation', score: 7.0, fill: '#9b59b6' }
+        { name: 'Part 1', score: 7.5, fill: '#9b59b6' },
+        { name: 'Part 2', score: 6.5, fill: '#9b59b6' },
+        { name: 'Part 3', score: 7.0, fill: '#9b59b6' }
       ]
     }
   ];

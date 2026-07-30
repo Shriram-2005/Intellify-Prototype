@@ -52,7 +52,9 @@ export default function DashboardLayout({
             >
               <div className="dashboard-profile-pill">
                 <span className="profile-email" style={{ color: 'var(--pure-black)' }}>student@intellify.com</span>
-                <div className="profile-avatar">SJ</div>
+                <Link href="/dashboard/profile" style={{ textDecoration: 'none' }}>
+                  <div className="profile-avatar" style={{ cursor: 'pointer' }}>SJ</div>
+                </Link>
                 <span className="profile-plan-badge">Pro+</span>
               </div>
             </BorderGlow>

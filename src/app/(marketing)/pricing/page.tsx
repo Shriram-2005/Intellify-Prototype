@@ -8,6 +8,7 @@ import './pricing.css';
 
 export default function Pricing() {
   const [isAnnual, setIsAnnual] = useState(false);
+  const [currency, setCurrency] = useState('INR'); // 'INR' or 'USD'
 
   return (
     <div className="pricing-page">
@@ -20,12 +21,21 @@ export default function Pricing() {
 
       <section className="pricing-content">
         <div className="pricing-container">
-          <div className="pricing-toggle-wrapper">
-            <div className="pricing-toggle">
-              <span className={!isAnnual ? "active" : ""} onClick={() => setIsAnnual(false)}>Monthly</span>
-              <span className={isAnnual ? "active" : ""} onClick={() => setIsAnnual(true)}>Annual</span>
+          <div className="pricing-toggles-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+            <div className="pricing-toggle-wrapper">
+              <div className="pricing-toggle">
+                <span className={!isAnnual ? "active" : ""} onClick={() => setIsAnnual(false)}>Monthly</span>
+                <span className={isAnnual ? "active" : ""} onClick={() => setIsAnnual(true)}>Annual</span>
+              </div>
+              <div className="save-badge-premium">Save 20%</div>
             </div>
-            <div className="save-badge-premium">Save 20%</div>
+            
+            <div className="pricing-toggle-wrapper">
+              <div className="pricing-toggle">
+                <span className={currency === 'INR' ? "active" : ""} onClick={() => setCurrency('INR')}>INR (₹)</span>
+                <span className={currency === 'USD' ? "active" : ""} onClick={() => setCurrency('USD')}>USD ($)</span>
+              </div>
+            </div>
           </div>
 
           <div className="pricing-cards">
@@ -48,11 +58,18 @@ export default function Pricing() {
                 </div>
                 <div className="price-container">
                   <div className="price-main">
-                    <span className="amount">${isAnnual ? '180' : '19'}</span>
+                    <span className="amount">
+                      {currency === 'INR' ? '₹' : '$'}
+                      {currency === 'INR' 
+                        ? (isAnnual ? '15,350' : '1,599') 
+                        : (isAnnual ? '180' : '19')}
+                    </span>
                     <small className="period">{isAnnual ? '/yr' : '/mo'}</small>
                   </div>
                   <div className="price-sub">
-                    {isAnnual ? 'Equivalent to $15/mo' : 'Billed $228/yr'}
+                    {currency === 'INR'
+                      ? (isAnnual ? 'Equivalent to ₹1,279/mo' : 'Billed ₹19,188/yr')
+                      : (isAnnual ? 'Equivalent to $15/mo' : 'Billed $228/yr')}
                   </div>
                 </div>
                 <ul className="pricing-features">
@@ -90,11 +107,18 @@ export default function Pricing() {
                 </div>
                 <div className="price-container">
                   <div className="price-main">
-                    <span className="amount">${isAnnual ? '276' : '29'}</span>
+                    <span className="amount">
+                      {currency === 'INR' ? '₹' : '$'}
+                      {currency === 'INR' 
+                        ? (isAnnual ? '23,990' : '2,499') 
+                        : (isAnnual ? '278' : '29')}
+                    </span>
                     <small className="period">{isAnnual ? '/yr' : '/mo'}</small>
                   </div>
                   <div className="price-sub">
-                    {isAnnual ? 'Equivalent to $23/mo' : 'Billed $348/yr'}
+                    {currency === 'INR'
+                      ? (isAnnual ? 'Equivalent to ₹1,999/mo' : 'Billed ₹29,988/yr')
+                      : (isAnnual ? 'Equivalent to $23/mo' : 'Billed $348/yr')}
                   </div>
                 </div>
                 <ul className="pricing-features">

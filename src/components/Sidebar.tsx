@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Home, BookOpen, PenTool, Video, CheckSquare, Target, BarChart2, User, ChevronDown, ChevronRight, HelpCircle } from 'lucide-react';
+import { Menu, X, Home, BookOpen, PenTool, Video, CheckSquare, Target, BarChart2, TrendingUp, User, ChevronDown, ChevronRight, HelpCircle } from 'lucide-react';
 import BorderGlow from './BorderGlow';
 import AnimatedList from './AnimatedList';
 import './Sidebar.css';
@@ -10,6 +10,7 @@ import './Sidebar.css';
 export const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isPracticeOpen, setIsPracticeOpen] = useState(false);
+  const [openPracticeModule, setOpenPracticeModule] = useState<string | null>(null);
   const [isFaqOpen, setIsFaqOpen] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const pathname = usePathname();
@@ -63,10 +64,79 @@ export const Sidebar: React.FC = () => {
       
       {!isCollapsed && isPracticeOpen && (
         <div className="intellify-sidebar-sublinks">
-          <Link href="/practice/listening" className={`intellify-sidebar-sublink ${isActive('/practice/listening') ? 'active' : ''}`}>Listening</Link>
-          <Link href="/practice/reading" className={`intellify-sidebar-sublink ${isActive('/practice/reading') ? 'active' : ''}`}>Reading</Link>
-          <Link href="/practice/writing" className={`intellify-sidebar-sublink ${isActive('/practice/writing') ? 'active' : ''}`}>Writing</Link>
-          <Link href="/practice/speaking" className={`intellify-sidebar-sublink ${isActive('/practice/speaking') ? 'active' : ''}`}>Speaking</Link>
+          
+          {/* Listening */}
+          <div className="sidebar-module-group">
+            <button 
+              className={`sidebar-module-btn ${pathname.includes('/practice/listening') || openPracticeModule === 'listening' ? 'active' : ''}`}
+              onClick={() => setOpenPracticeModule(openPracticeModule === 'listening' ? null : 'listening')}
+            >
+              Listening
+              <ChevronDown size={14} className={`chevron-icon ${openPracticeModule === 'listening' ? 'open' : ''}`} />
+            </button>
+            {openPracticeModule === 'listening' && (
+              <div className="intellify-sidebar-nested-links">
+                <Link href="/practice/listening/section-1" className={`intellify-sidebar-nested-link ${isActive('/practice/listening/section-1') ? 'active' : ''}`}>Section 1</Link>
+                <Link href="/practice/listening/section-2" className={`intellify-sidebar-nested-link ${isActive('/practice/listening/section-2') ? 'active' : ''}`}>Section 2</Link>
+                <Link href="/practice/listening/section-3" className={`intellify-sidebar-nested-link ${isActive('/practice/listening/section-3') ? 'active' : ''}`}>Section 3</Link>
+                <Link href="/practice/listening/section-4" className={`intellify-sidebar-nested-link ${isActive('/practice/listening/section-4') ? 'active' : ''}`}>Section 4</Link>
+              </div>
+            )}
+          </div>
+
+          {/* Reading */}
+          <div className="sidebar-module-group">
+            <button 
+              className={`sidebar-module-btn ${pathname.includes('/practice/reading') || openPracticeModule === 'reading' ? 'active' : ''}`}
+              onClick={() => setOpenPracticeModule(openPracticeModule === 'reading' ? null : 'reading')}
+            >
+              Reading
+              <ChevronDown size={14} className={`chevron-icon ${openPracticeModule === 'reading' ? 'open' : ''}`} />
+            </button>
+            {openPracticeModule === 'reading' && (
+              <div className="intellify-sidebar-nested-links">
+                <Link href="/practice/reading/passage-1" className={`intellify-sidebar-nested-link ${isActive('/practice/reading/passage-1') ? 'active' : ''}`}>Passage 1</Link>
+                <Link href="/practice/reading/passage-2" className={`intellify-sidebar-nested-link ${isActive('/practice/reading/passage-2') ? 'active' : ''}`}>Passage 2</Link>
+                <Link href="/practice/reading/passage-3" className={`intellify-sidebar-nested-link ${isActive('/practice/reading/passage-3') ? 'active' : ''}`}>Passage 3</Link>
+              </div>
+            )}
+          </div>
+
+          {/* Writing */}
+          <div className="sidebar-module-group">
+            <button 
+              className={`sidebar-module-btn ${pathname.includes('/practice/writing') || openPracticeModule === 'writing' ? 'active' : ''}`}
+              onClick={() => setOpenPracticeModule(openPracticeModule === 'writing' ? null : 'writing')}
+            >
+              Writing
+              <ChevronDown size={14} className={`chevron-icon ${openPracticeModule === 'writing' ? 'open' : ''}`} />
+            </button>
+            {openPracticeModule === 'writing' && (
+              <div className="intellify-sidebar-nested-links">
+                <Link href="/practice/writing/task-1" className={`intellify-sidebar-nested-link ${isActive('/practice/writing/task-1') ? 'active' : ''}`}>Task 1</Link>
+                <Link href="/practice/writing/task-2" className={`intellify-sidebar-nested-link ${isActive('/practice/writing/task-2') ? 'active' : ''}`}>Task 2</Link>
+              </div>
+            )}
+          </div>
+
+          {/* Speaking */}
+          <div className="sidebar-module-group">
+            <button 
+              className={`sidebar-module-btn ${pathname.includes('/practice/speaking') || openPracticeModule === 'speaking' ? 'active' : ''}`}
+              onClick={() => setOpenPracticeModule(openPracticeModule === 'speaking' ? null : 'speaking')}
+            >
+              Speaking
+              <ChevronDown size={14} className={`chevron-icon ${openPracticeModule === 'speaking' ? 'open' : ''}`} />
+            </button>
+            {openPracticeModule === 'speaking' && (
+              <div className="intellify-sidebar-nested-links">
+                <Link href="/practice/speaking/part-1" className={`intellify-sidebar-nested-link ${isActive('/practice/speaking/part-1') ? 'active' : ''}`}>Part 1</Link>
+                <Link href="/practice/speaking/part-2" className={`intellify-sidebar-nested-link ${isActive('/practice/speaking/part-2') ? 'active' : ''}`}>Part 2</Link>
+                <Link href="/practice/speaking/part-3" className={`intellify-sidebar-nested-link ${isActive('/practice/speaking/part-3') ? 'active' : ''}`}>Part 3</Link>
+              </div>
+            )}
+          </div>
+
         </div>
       )}
     </div>,
@@ -75,7 +145,7 @@ export const Sidebar: React.FC = () => {
 
     renderLink('/mock-exam', <Target size={20} />, 'Mock Exams'),
     renderLink('/results/history', <BarChart2 size={20} />, 'My Results'),
-    renderLink('/dashboard/progress', <BarChart2 size={20} />, 'Progress'),
+    renderLink('/dashboard/progress', <TrendingUp size={20} />, 'Progress'),
     renderLink('/dashboard/profile', <User size={20} />, 'Profile')
   ];
 

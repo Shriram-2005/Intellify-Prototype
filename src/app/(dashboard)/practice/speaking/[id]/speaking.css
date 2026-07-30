@@ -207,8 +207,8 @@
 /* AI Assistant Toggle & Sidebar */
 .ai-toggle-wrapper {
   position: absolute;
-  bottom: 32px;
-  right: 32px;
+  top: 24px;
+  right: 24px;
   z-index: 20;
 }
 
