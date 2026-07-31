@@ -5,13 +5,20 @@ import { Bell, LogOut } from 'lucide-react';
 import Lanyard from '@/components/Lanyard';
 import BorderGlow from '@/components/BorderGlow';
 import ThemeToggle from '@/components/ThemeToggle';
+import { createClient } from '@/utils/supabase/server';
+import { signout } from '@/app/(marketing)/auth/actions';
 import './dashboard.css';
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const email = user?.email || 'student@intellify.com';
+  const initial = email.charAt(0).toUpperCase();
+
   return (
     <div className="intellify-dashboard-layout">
       <Sidebar />
@@ -51,9 +58,9 @@ export default function DashboardLayout({
               colors={['#E74C3C', '#C0392B', '#ff6b5b']}
             >
               <div className="dashboard-profile-pill">
-                <span className="profile-email" style={{ color: 'var(--pure-black)' }}>student@intellify.com</span>
+                <span className="profile-email" style={{ color: 'var(--pure-black)' }}>{email}</span>
                 <Link href="/dashboard/profile" style={{ textDecoration: 'none' }}>
-                  <div className="profile-avatar" style={{ cursor: 'pointer' }}>SJ</div>
+                  <div className="profile-avatar" style={{ cursor: 'pointer' }}>{initial}</div>
                 </Link>
                 <span className="profile-plan-badge">Pro+</span>
               </div>
@@ -85,10 +92,12 @@ export default function DashboardLayout({
                 animated={true}
                 colors={['#E74C3C', '#C0392B', '#ff6b5b']}
               >
-                <Link href="/" className="dashboard-logout-btn" style={{ textDecoration: 'none', color: 'var(--pure-black)' }}>
+              <form action={signout} className="dashboard-logout-btn" style={{ padding: '0' }}>
+                <button type="submit" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', border: 'none', color: 'inherit', font: 'inherit', cursor: 'pointer', padding: '10px 20px', width: '100%', borderRadius: '999px' }}>
                   <LogOut size={18} />
                   <span>Logout</span>
-                </Link>
+                </button>
+              </form>
               </BorderGlow>
             </div>
           </div>

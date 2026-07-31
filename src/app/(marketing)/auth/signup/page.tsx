@@ -2,20 +2,18 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import BorderGlow from '@/components/BorderGlow';
+import { signup } from '../actions';
+import { AlertCircle } from 'lucide-react';
 import '../auth.css';
 
 export default function Signup() {
   const router = useRouter();
-
-  const handleSignup = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simulate signup and redirect to dashboard
-    router.push('/dashboard');
-  };
+  const searchParams = useSearchParams();
+  const error = searchParams.get('error');
 
   return (
     <div className="auth-page">
@@ -43,16 +41,23 @@ export default function Signup() {
               <div className="auth-header">
                 <h2>Create Account</h2>
               </div>
+
+              {error && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#FEF2F2', color: '#DC2626', padding: '12px', borderRadius: '8px', marginBottom: '24px', fontSize: '14px', fontWeight: 500 }}>
+                  <AlertCircle size={16} />
+                  <span>{error}</span>
+                </div>
+              )}
               
-              <form className="auth-form" onSubmit={handleSignup}>
+              <form className="auth-form" autoComplete="off" action={signup}>
                 <div className="auth-form-grid">
                   <div className="auth-form-col">
-                    <Input label="Full Name" type="text" placeholder="John Doe" required />
-                    <Input label="Email Address" type="email" placeholder="you@example.com" required />
+                    <Input id="name" name="name" label="Full Name" type="text" placeholder="John Doe" autoComplete="off" required />
+                    <Input id="email" name="email" label="Email Address" type="email" placeholder="you@example.com" autoComplete="off" required />
                   </div>
                   <div className="auth-form-col">
-                    <Input label="Password" type="password" placeholder="••••••••" required />
-                    <Input label="Confirm Password" type="password" placeholder="••••••••" required />
+                    <Input id="password" name="password" label="Password" type="password" placeholder="••••••••" autoComplete="new-password" required />
+                    <Input id="confirmPassword" name="confirmPassword" label="Confirm Password" type="password" placeholder="••••••••" autoComplete="new-password" required />
                   </div>
                 </div>
                 
@@ -68,7 +73,7 @@ export default function Signup() {
                 <span>OR</span>
               </div>
 
-              <Button type="button" variant="secondary" fullWidth className="google-btn" onClick={() => router.push('/dashboard')}>
+              <Button type="button" variant="secondary" fullWidth className="google-btn" onClick={() => alert('Google Sign In coming soon!')}>
                 Continue with Google
               </Button>
 

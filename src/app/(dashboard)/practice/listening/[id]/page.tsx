@@ -1,86 +1,149 @@
 "use client";
 
-import React, { useState, use } from 'react';
+import React, { useState, use, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/Button';
 import BorderGlow from '@/components/BorderGlow';
-import { ArrowLeft, Clock, Save, Send, Sparkles, ChevronRight, Play, Pause, Volume2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Clock, Save, Send, Sparkles, ChevronRight, Play, Pause, Volume2, CheckCircle2, RefreshCw } from 'lucide-react';
+import { useCountdownTimer } from '@/hooks/useCountdownTimer';
+import { createClient } from '@/utils/supabase/client';
 import './listening.css';
-
-const mockListeningData: Record<string, any> = {
-  'section-1': {
-    title: 'Everyday Social Conversation',
-    meta: 'Audio Clip • 5 Minutes',
-    context: 'A customer is calling a local sports center to inquire about membership options and classes.',
-    visualText: '[ Booking Form ]',
-    questionsTitle: 'Questions 1-3',
-    questionsDesc: 'Complete the form below. Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.',
-    questions: [
-      { num: 1, text: "Customer Name: John ____", isFill: true },
-      { num: 2, text: "Preferred class: ____ Yoga", isFill: true },
-      { num: 3, text: "Membership start date: 15th ____", isFill: true }
-    ]
-  },
-  'section-2': {
-    title: 'Social Monologue',
-    meta: 'Audio Clip • 5 Minutes',
-    context: 'A tour guide is giving a welcome talk to a group of tourists visiting a historical museum.',
-    visualText: '[ Map of the Museum ]',
-    questionsTitle: 'Questions 11-13',
-    questionsDesc: 'Label the map below. Choose the correct letter A, B, or C.',
-    questions: [
-      { num: 11, text: "Gift Shop", options: ['A', 'B', 'C'] },
-      { num: 12, text: "Cafeteria", options: ['A', 'B', 'C'] },
-      { num: 13, text: "Exhibition Hall", options: ['A', 'B', 'C'] }
-    ]
-  },
-  'section-3': {
-    title: 'Academic Discussion',
-    meta: 'Audio Clip • 4 Minutes',
-    context: 'Two university students, Emma and Liam, are discussing their upcoming group project on urban architecture with their tutor, Dr. Harrison.',
-    visualText: '[ Diagram of City Layout ]',
-    questionsTitle: 'Questions 21-23',
-    questionsDesc: 'Choose the correct letter, A, B, or C.',
-    questions: [
-      { num: 21, text: "What aspect of the project are the students struggling with?", options: ["A. Finding reliable sources", "B. Agreeing on a specific topic", "C. Managing their time effectively"] },
-      { num: 22, text: "Dr. Harrison suggests that they focus their research on...", options: ["A. Modern eco-friendly buildings", "B. Historical preservation techniques", "C. The impact of transportation on city planning"] },
-      { num: 23, text: "Emma believes the most important factor in urban planning is...", options: ["A. Green spaces", "B. Public transport", "C. Affordable housing"] }
-    ]
-  },
-  'section-4': {
-    title: 'Academic Lecture',
-    meta: 'Audio Clip • 6 Minutes',
-    context: 'A university professor is giving a lecture on the behavioral patterns of deep-sea marine life.',
-    visualText: '[ Ocean Depth Chart ]',
-    questionsTitle: 'Questions 31-33',
-    questionsDesc: 'Complete the notes below. Write NO MORE THAN TWO WORDS for each answer.',
-    questions: [
-      { num: 31, text: "Bioluminescence is used by many species to attract ____.", isFill: true },
-      { num: 32, text: "The primary source of food at extreme depths is known as marine ____.", isFill: true },
-      { num: 33, text: "Giant squids possess the largest ____ in the animal kingdom.", isFill: true }
-    ]
-  }
-};
 
 export default function ListeningPractice({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
-
   const currentId = unwrappedParams.id;
-  const data = mockListeningData[currentId] || mockListeningData['section-1'];
   
-  const sectionKeys = Object.keys(mockListeningData);
-  const currentIndex = sectionKeys.indexOf(currentId);
-  const isFirst = currentIndex === 0;
-  const isLast = currentIndex === sectionKeys.length - 1;
-  const prevId = !isFirst ? sectionKeys[currentIndex - 1] : null;
-  const nextId = !isLast ? sectionKeys[currentIndex + 1] : null;
+  const [data, setData] = useState<any>(null);
+  const [testRecordId, setTestRecordId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [sectionKeys, setSectionKeys] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<{[key: number]: string}>({});
 
+  const { timeLeft, startTimer } = useCountdownTimer('15:00');
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      const { data: userAuth } = await supabase.auth.getUser();
+      if (userAuth?.user) {
+        setUserId(userAuth.user.id);
+      }
+
+      // Load all slugs for pagination
+      const { data: allTests } = await supabase
+        .from('tests')
+        .select('slug')
+        .eq('type', 'listening')
+        .order('slug');
+      
+      if (allTests) {
+        setSectionKeys(allTests.map(t => t.slug));
+      }
+
+      // Load specific test
+      const { data: testData } = await supabase
+        .from('tests')
+        .select('*')
+        .eq('type', 'listening')
+        .eq('slug', currentId)
+        .single();
+
+      if (testData) {
+        setData({
+          title: testData.title,
+          meta: testData.meta,
+          ...testData.content
+        });
+        setTestRecordId(testData.id);
+
+        // Load saved answers for this user
+        if (userAuth?.user) {
+          const { data: savedResponse } = await supabase
+            .from('user_responses')
+            .select('answer_data')
+            .eq('test_id', testData.id)
+            .eq('user_id', userAuth.user.id)
+            .single();
+
+          if (savedResponse && savedResponse.answer_data) {
+            setSelectedAnswers(savedResponse.answer_data);
+          }
+        }
+      }
+      setLoading(false);
+    }
+    loadData();
+  }, [currentId, supabase]);
+
+  const currentIndex = sectionKeys.indexOf(currentId);
+  const isFirst = currentIndex === 0;
+  const isLast = currentIndex === sectionKeys.length - 1;
+  const prevId = !isFirst && sectionKeys.length > 0 ? sectionKeys[currentIndex - 1] : null;
+  const nextId = !isLast && sectionKeys.length > 0 ? sectionKeys[currentIndex + 1] : null;
+
+  const handleSave = async () => {
+    if (!userId || !testRecordId) {
+      alert("Please log in to save your progress.");
+      return;
+    }
+
+    // Check if response already exists
+    const { data: existing } = await supabase
+      .from('user_responses')
+      .select('id')
+      .eq('test_id', testRecordId)
+      .eq('user_id', userId)
+      .single();
+
+    if (existing) {
+      // Update
+      await supabase
+        .from('user_responses')
+        .update({ answer_data: selectedAnswers })
+        .eq('id', existing.id);
+    } else {
+      // Insert
+      await supabase
+        .from('user_responses')
+        .insert([{
+          user_id: userId,
+          test_id: testRecordId,
+          module_type: 'listening',
+          answer_data: selectedAnswers
+        }]);
+    }
+    
+    alert('Progress saved to database successfully!');
+  };
+
   const handleSelect = (qNum: number, answer: string) => {
     setSelectedAnswers(prev => ({ ...prev, [qNum]: answer }));
+    startTimer();
   };
+
+  if (loading) {
+    return (
+      <div className="practice-workspace" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', color: 'var(--mid-gray)' }}>
+          <RefreshCw size={32} className="spin" />
+          <p>Loading test from database...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="practice-workspace" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <p>Test not found.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="practice-workspace">
@@ -97,16 +160,16 @@ export default function ListeningPractice({ params }: { params: Promise<{ id: st
         <div className="header-center">
           <div className="timer-pill">
             <Clock size={16} className="timer-icon" />
-            <span className="timer-text">15:00</span>
+            <span className="timer-text">{timeLeft}</span>
           </div>
         </div>
         
         <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div className="word-count-pill" style={{ marginRight: '8px' }}>
-            <span className="count count-good">{Object.keys(selectedAnswers).length}</span> / 5 Answered
+            <span className="count count-good">{Object.keys(selectedAnswers).length}</span> / {data.questions?.length || 0} Answered
           </div>
           
-          <Button variant="ghost" className="header-btn"><Save size={16} style={{ marginRight: '6px' }} /> Save</Button>
+          <Button variant="ghost" className="header-btn" onClick={handleSave}><Save size={16} style={{ marginRight: '6px' }} /> Save</Button>
           
           <div className="ai-toggle-header">
             <BorderGlow
@@ -132,10 +195,12 @@ export default function ListeningPractice({ params }: { params: Promise<{ id: st
             </BorderGlow>
           </div>
 
-          {prevId && (
+          {prevId ? (
             <Link href={`/practice/listening/${prevId}`}>
               <Button variant="ghost" className="header-btn"><ArrowLeft size={16} style={{ marginRight: '6px' }} /> Previous</Button>
             </Link>
+          ) : (
+            <Button variant="ghost" className="header-btn" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}><ArrowLeft size={16} style={{ marginRight: '6px' }} /> Previous</Button>
           )}
           
           {nextId ? (
@@ -143,9 +208,15 @@ export default function ListeningPractice({ params }: { params: Promise<{ id: st
               <Button variant="primary" className="header-btn" style={{ background: 'var(--primary-red)' }}>Next <ChevronRight size={16} style={{ marginLeft: '6px' }} /></Button>
             </Link>
           ) : (
+            <Button variant="primary" className="header-btn" disabled style={{ background: 'var(--primary-red)', opacity: 0.5, cursor: 'not-allowed' }}>Next <ChevronRight size={16} style={{ marginLeft: '6px' }} /></Button>
+          )}
+
+          {!nextId ? (
             <Link href={`/dashboard`}>
               <Button variant="primary" className="header-btn submit-btn" style={{ background: 'var(--success-color)' }}>Submit Test <CheckCircle2 size={16} style={{ marginLeft: '6px' }} /></Button>
             </Link>
+          ) : (
+            <Button variant="primary" className="header-btn submit-btn" disabled style={{ background: 'var(--success-color)', opacity: 0.5, cursor: 'not-allowed' }}>Submit Test <CheckCircle2 size={16} style={{ marginLeft: '6px' }} /></Button>
           )}
         </div>
       </header>
@@ -172,7 +243,7 @@ export default function ListeningPractice({ params }: { params: Promise<{ id: st
                 colors={['#3498db', '#2980b9', '#74b9ff']}
               >
                 <div className="premium-audio-player">
-                  <button className="play-btn" onClick={() => setIsPlaying(!isPlaying)}>
+                  <button className="play-btn" onClick={() => { setIsPlaying(!isPlaying); if (!isPlaying) startTimer(); }}>
                     {isPlaying ? <Pause size={24} color="#fff" /> : <Play size={24} color="#fff" style={{ marginLeft: '4px' }} />}
                   </button>
                   <div className="audio-progress">
@@ -212,7 +283,7 @@ export default function ListeningPractice({ params }: { params: Promise<{ id: st
             </div>
 
             <div className="questions-list">
-              {data.questions.map((q: any) => (
+              {data.questions?.map((q: any) => (
                 <div className="question-item" key={q.num}>
                   <div className="question-text">
                     <strong>{q.num}.</strong> {q.text}
@@ -230,7 +301,7 @@ export default function ListeningPractice({ params }: { params: Promise<{ id: st
                     </div>
                   ) : (
                     <div className="mcq-options">
-                      {q.options.map((opt: string) => (
+                      {(q.options || ['True', 'False', 'Not Given']).map((opt: string) => (
                         <button 
                           key={opt}
                           className={`mcq-option ${selectedAnswers[q.num] === opt ? 'selected' : ''}`}
@@ -258,12 +329,12 @@ export default function ListeningPractice({ params }: { params: Promise<{ id: st
           
           <div className="ai-tips-list">
             <div className="ai-tip">
-              <h5>Distractor Warning</h5>
-              <p>Listen closely! Speakers in Part 3 often change their minds. Liam just suggested 'B', but Emma disagreed.</p>
+              <h5>Keyword Alert</h5>
+              <p>Listen carefully when the speaker mentions dates or numbers; they are often answers to fill-in-the-blank questions.</p>
             </div>
             <div className="ai-tip">
-              <h5>Keyword Alert</h5>
-              <p>The tutor just mentioned "transportation". Get ready for Question 22.</p>
+              <h5>Distractor Warning</h5>
+              <p>Speakers in IELTS often correct themselves. Make sure you write down the final answer they decide on!</p>
             </div>
           </div>
         </div>

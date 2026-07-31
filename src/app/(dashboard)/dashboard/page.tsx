@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
-import { Target, TrendingUp, Mic, PenLine, BookOpen, Activity, Zap } from 'lucide-react';
+import { Target, TrendingUp, Mic, PenLine, BookOpen, Activity, Zap, RefreshCw } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
+import { createClient } from '@/utils/supabase/client';
 import './overview.css';
 
 // Mock Data for Charts
@@ -52,14 +53,50 @@ const CustomRadarTooltip = ({ active, payload }: any) => {
     );
   }
   return null;
-};
+}
 
 export default function DashboardOverview() {
   const [mounted, setMounted] = useState(false);
+  const [firstName, setFirstName] = useState('Student');
+  const [targetBand, setTargetBand] = useState('8.5');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
+    
+    async function fetchUserData() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, target_band_score')
+          .eq('id', user.id)
+          .single();
+          
+        if (profile?.full_name) {
+          setFirstName(profile.full_name.split(' ')[0]);
+        } else if (user.email) {
+          setFirstName(user.email.split('@')[0]);
+        }
+        
+        if (profile?.target_band_score) {
+          setTargetBand(String(profile.target_band_score));
+        }
+      }
+      setLoading(false);
+    }
+    
+    fetchUserData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="dashboard-overview" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <RefreshCw size={32} className="spin" color="var(--mid-gray)" />
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-overview">
@@ -67,7 +104,7 @@ export default function DashboardOverview() {
       <div className="hero-insight-banner">
         <div className="hero-content">
           <div className="hero-greeting">
-            <h2>Welcome back, John!</h2>
+            <h2 style={{ textTransform: 'capitalize' }}>Welcome back, {firstName}!</h2>
             <p>You're making great progress towards your goals today.</p>
           </div>
           
@@ -89,7 +126,7 @@ export default function DashboardOverview() {
           </div>
           <div className="stat-box">
             <div className="stat-label">Target Band</div>
-            <div className="stat-value">8.5</div>
+            <div className="stat-value">{targetBand}</div>
             <div className="stat-trend neutral">Almost there!</div>
           </div>
         </div>

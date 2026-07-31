@@ -1,81 +1,149 @@
 "use client";
 
-import React, { useState, use } from 'react';
+import React, { useState, use, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/Button';
 import BorderGlow from '@/components/BorderGlow';
-import { ArrowLeft, Clock, Save, Send, Sparkles, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Clock, Save, Send, Sparkles, ChevronRight, CheckCircle2, RefreshCw } from 'lucide-react';
+import { useCountdownTimer } from '@/hooks/useCountdownTimer';
+import { createClient } from '@/utils/supabase/client';
 import './reading.css';
-
-const mockReadingData: Record<string, any> = {
-  'passage-1': {
-    title: 'The Secret Life of Trees',
-    meta: 'Academic Reading • Passage 1',
-    paragraphs: [
-      'For centuries, trees have been regarded merely as the silent, solitary giants of the natural world. However, recent ecological research has revolutionized our understanding of arboreal communities, revealing a complex, interconnected web of communication and resource sharing that challenges our fundamental perception of forest ecosystems.',
-      'At the heart of this hidden network is the mycorrhizal network, often playfully referred to by scientists as the "Wood Wide Web." This intricate system consists of underground fungal threads known as mycelium, which colonize the roots of trees and other plants. Through this symbiotic relationship, trees are able to exchange vital nutrients, water, and even chemical warning signals.',
-      'Dr. Suzanne Simard, a pioneer in forest ecology, demonstrated that older, more established trees—often termed "Mother Trees"—use this fungal network to supply younger, shaded saplings with excess carbon, effectively keeping them alive in light-deprived understories. Furthermore, when a tree is under attack by pests, it can transmit distress signals through the mycelium, prompting neighboring trees to preemptively ramp up their defensive enzymes.'
-    ],
-    questionsTitle: 'Questions 1-3',
-    questionsDesc: 'Do the following statements agree with the information given in Reading Passage 1?',
-    questions: [
-      { num: 1, text: "Trees are now known to communicate and share resources with one another." },
-      { num: 2, text: "The 'Wood Wide Web' is a system consisting entirely of tree roots touching each other." },
-      { num: 3, text: "Mother Trees prioritize their own survival over supplying saplings with carbon." }
-    ]
-  },
-  'passage-2': {
-    title: 'The History of the Printing Press',
-    meta: 'Academic Reading • Passage 2',
-    paragraphs: [
-      'The invention of the printing press by Johannes Gutenberg in the 15th century is widely regarded as one of the most significant events in human history. Prior to its invention, books were meticulously copied by hand, making them rare and prohibitively expensive. The printing press democratized knowledge by allowing for the mass production of books.',
-      'Gutenberg’s key innovation was the use of movable metal type. Unlike woodblock printing, which required a new block to be carved for every page, movable type allowed individual letters to be rearranged and reused. This drastically reduced the time and cost required to produce printed materials.',
-      'The impact of the printing press was profound. It fueled the Renaissance, accelerated the scientific revolution, and played a crucial role in the Protestant Reformation by allowing religious texts to be widely distributed in vernacular languages.'
-    ],
-    questionsTitle: 'Questions 4-6',
-    questionsDesc: 'Choose the correct letter, A, B, C or D.',
-    questions: [
-      { num: 4, text: "Before the printing press, books were...", isMCQ: true, options: ['Cheap and accessible', 'Written in English', 'Copied by hand', 'Printed using woodblocks'] },
-      { num: 5, text: "Gutenberg's key innovation was...", isMCQ: true, options: ['Woodblock printing', 'Movable metal type', 'The alphabet', 'The Renaissance'] },
-      { num: 6, text: "The printing press helped fuel...", isMCQ: true, options: ['The industrial revolution', 'The Protestant Reformation', 'The middle ages', 'Agriculture'] }
-    ]
-  },
-  'passage-3': {
-    title: 'Artificial Intelligence in Medicine',
-    meta: 'Academic Reading • Passage 3',
-    paragraphs: [
-      'Artificial intelligence (AI) is rapidly transforming the field of medicine, offering unprecedented opportunities for improving patient care, accelerating medical research, and optimizing healthcare operations. One of the most promising applications of AI is in medical imaging, where machine learning algorithms can analyze X-rays, MRIs, and CT scans with a level of accuracy that often rivals or exceeds that of human radiologists.',
-      'AI is also playing a critical role in drug discovery. Traditionally, bringing a new drug to market can take over a decade and cost billions of dollars. AI can significantly expedite this process by analyzing vast datasets of chemical compounds and predicting their efficacy and potential side effects, thereby identifying promising drug candidates much faster than traditional methods.',
-      'Despite these advancements, the integration of AI in healthcare is not without challenges. Issues such as data privacy, algorithmic bias, and the need for rigorous clinical validation must be addressed. Moreover, the role of the physician remains indispensable, as AI is best utilized as an augmentative tool rather than a replacement for human judgment and empathy.'
-    ],
-    questionsTitle: 'Questions 7-9',
-    questionsDesc: 'Complete the summary below. Choose NO MORE THAN TWO WORDS from the passage for each answer.',
-    questions: [
-      { num: 7, text: "AI algorithms can analyze medical images with high ____.", isFill: true },
-      { num: 8, text: "In drug discovery, AI can identify promising ____ much faster.", isFill: true },
-      { num: 9, text: "AI should be used as an augmentative tool rather than a replacement for human ____.", isFill: true }
-    ]
-  }
-};
 
 export default function ReadingPractice({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
-  
   const currentId = unwrappedParams.id;
-  const data = mockReadingData[currentId] || mockReadingData['passage-1'];
   
-  const passageKeys = Object.keys(mockReadingData);
+  const [data, setData] = useState<any>(null);
+  const [testRecordId, setTestRecordId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [passageKeys, setPassageKeys] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
+  const [selectedAnswers, setSelectedAnswers] = useState<{[key: number]: string}>({});
+  const { timeLeft, startTimer } = useCountdownTimer('20:00');
+
+  const supabase = createClient();
+
+  // Load from Supabase
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      const { data: userAuth } = await supabase.auth.getUser();
+      if (userAuth?.user) {
+        setUserId(userAuth.user.id);
+      }
+
+      // Load all slugs for pagination
+      const { data: allTests } = await supabase
+        .from('tests')
+        .select('slug')
+        .eq('type', 'reading')
+        .order('slug');
+      
+      if (allTests) {
+        setPassageKeys(allTests.map(t => t.slug));
+      }
+
+      // Load specific test
+      const { data: testData } = await supabase
+        .from('tests')
+        .select('*')
+        .eq('type', 'reading')
+        .eq('slug', currentId)
+        .single();
+
+      if (testData) {
+        setData({
+          title: testData.title,
+          meta: testData.meta,
+          ...testData.content
+        });
+        setTestRecordId(testData.id);
+
+        // Load saved answers for this user
+        if (userAuth?.user) {
+          const { data: savedResponse } = await supabase
+            .from('user_responses')
+            .select('answer_data')
+            .eq('test_id', testData.id)
+            .eq('user_id', userAuth.user.id)
+            .single();
+
+          if (savedResponse && savedResponse.answer_data) {
+            setSelectedAnswers(savedResponse.answer_data);
+          }
+        }
+      }
+      setLoading(false);
+    }
+    loadData();
+  }, [currentId, supabase]);
+
   const currentIndex = passageKeys.indexOf(currentId);
   const isFirst = currentIndex === 0;
   const isLast = currentIndex === passageKeys.length - 1;
-  const prevId = !isFirst ? passageKeys[currentIndex - 1] : null;
-  const nextId = !isLast ? passageKeys[currentIndex + 1] : null;
-  const [aiPanelOpen, setAiPanelOpen] = useState(false);
-  const [selectedAnswers, setSelectedAnswers] = useState<{[key: number]: string}>({});
+  const prevId = !isFirst && passageKeys.length > 0 ? passageKeys[currentIndex - 1] : null;
+  const nextId = !isLast && passageKeys.length > 0 ? passageKeys[currentIndex + 1] : null;
+
+  const handleSave = async () => {
+    if (!userId || !testRecordId) {
+      alert("Please log in to save your progress.");
+      return;
+    }
+
+    // Check if response already exists
+    const { data: existing } = await supabase
+      .from('user_responses')
+      .select('id')
+      .eq('test_id', testRecordId)
+      .eq('user_id', userId)
+      .single();
+
+    if (existing) {
+      // Update
+      await supabase
+        .from('user_responses')
+        .update({ answer_data: selectedAnswers })
+        .eq('id', existing.id);
+    } else {
+      // Insert
+      await supabase
+        .from('user_responses')
+        .insert([{
+          user_id: userId,
+          test_id: testRecordId,
+          module_type: 'reading',
+          answer_data: selectedAnswers
+        }]);
+    }
+    
+    alert('Progress saved to database successfully!');
+  };
 
   const handleSelect = (qNum: number, answer: string) => {
     setSelectedAnswers(prev => ({ ...prev, [qNum]: answer }));
+    startTimer();
   };
+
+  if (loading) {
+    return (
+      <div className="practice-workspace" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', color: 'var(--mid-gray)' }}>
+          <RefreshCw size={32} className="spin" />
+          <p>Loading test from database...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="practice-workspace" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <p>Test not found.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="practice-workspace">
@@ -92,16 +160,16 @@ export default function ReadingPractice({ params }: { params: Promise<{ id: stri
         <div className="header-center">
           <div className="timer-pill">
             <Clock size={16} className="timer-icon" />
-            <span className="timer-text">20:00</span>
+            <span className="timer-text">{timeLeft}</span>
           </div>
         </div>
         
         <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div className="word-count-pill" style={{ marginRight: '8px' }}>
-            <span className="count count-good">{Object.keys(selectedAnswers).length}</span> / 5 Answered
+            <span className="count count-good">{Object.keys(selectedAnswers).length}</span> / {data.questions?.length || 0} Answered
           </div>
           
-          <Button variant="ghost" className="header-btn"><Save size={16} style={{ marginRight: '6px' }} /> Save</Button>
+          <Button variant="ghost" className="header-btn" onClick={handleSave}><Save size={16} style={{ marginRight: '6px' }} /> Save</Button>
           
           <div className="ai-toggle-header">
             <BorderGlow
@@ -127,10 +195,12 @@ export default function ReadingPractice({ params }: { params: Promise<{ id: stri
             </BorderGlow>
           </div>
 
-          {prevId && (
+          {prevId ? (
             <Link href={`/practice/reading/${prevId}`}>
               <Button variant="ghost" className="header-btn"><ArrowLeft size={16} style={{ marginRight: '6px' }} /> Previous</Button>
             </Link>
+          ) : (
+            <Button variant="ghost" className="header-btn" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}><ArrowLeft size={16} style={{ marginRight: '6px' }} /> Previous</Button>
           )}
           
           {nextId ? (
@@ -138,9 +208,15 @@ export default function ReadingPractice({ params }: { params: Promise<{ id: stri
               <Button variant="primary" className="header-btn" style={{ background: 'var(--primary-red)' }}>Next <ChevronRight size={16} style={{ marginLeft: '6px' }} /></Button>
             </Link>
           ) : (
+            <Button variant="primary" className="header-btn" disabled style={{ background: 'var(--primary-red)', opacity: 0.5, cursor: 'not-allowed' }}>Next <ChevronRight size={16} style={{ marginLeft: '6px' }} /></Button>
+          )}
+
+          {!nextId ? (
             <Link href={`/dashboard`}>
               <Button variant="primary" className="header-btn submit-btn" style={{ background: 'var(--success-color)' }}>Submit Test <CheckCircle2 size={16} style={{ marginLeft: '6px' }} /></Button>
             </Link>
+          ) : (
+            <Button variant="primary" className="header-btn submit-btn" disabled style={{ background: 'var(--success-color)', opacity: 0.5, cursor: 'not-allowed' }}>Submit Test <CheckCircle2 size={16} style={{ marginLeft: '6px' }} /></Button>
           )}
         </div>
       </header>
@@ -155,7 +231,7 @@ export default function ReadingPractice({ params }: { params: Promise<{ id: stri
             </div>
             
             <div className="prompt-content passage-content">
-              {data.paragraphs.map((p: string, i: number) => (
+              {data.paragraphs?.map((p: string, i: number) => (
                 <p key={i}>{p}</p>
               ))}
             </div>
@@ -172,7 +248,7 @@ export default function ReadingPractice({ params }: { params: Promise<{ id: stri
             </div>
 
             <div className="questions-list">
-              {data.questions.map((q: any) => (
+              {data.questions?.map((q: any) => (
                 <div className="question-item" key={q.num}>
                   <div className="question-text">
                     <strong>{q.num}.</strong> {q.text}

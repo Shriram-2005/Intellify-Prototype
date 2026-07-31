@@ -2,20 +2,18 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import BorderGlow from '@/components/BorderGlow';
+import { login } from '../actions';
+import { AlertCircle } from 'lucide-react';
 import '../auth.css';
 
 export default function Login() {
   const router = useRouter();
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simulate login and redirect to dashboard
-    router.push('/dashboard');
-  };
+  const searchParams = useSearchParams();
+  const error = searchParams.get('error');
 
   return (
     <div className="auth-page">
@@ -43,21 +41,32 @@ export default function Login() {
               <div className="auth-header">
                 <h2>Sign In</h2>
               </div>
+
+              {error && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#FEF2F2', color: '#DC2626', padding: '12px', borderRadius: '8px', marginBottom: '24px', fontSize: '14px', fontWeight: 500 }}>
+                  <AlertCircle size={16} />
+                  <span>{error}</span>
+                </div>
+              )}
               
-              <form className="auth-form" onSubmit={handleLogin}>
+              <form className="auth-form" autoComplete="off" action={login}>
                 <Input 
+                  id="email"
+                  name="email"
                   label="Email Address" 
                   type="email" 
                   placeholder="you@example.com" 
-                  defaultValue="mockuser@intellify.com"
+                  autoComplete="off"
                   required
                 />
                 <div className="password-group">
                   <Input 
+                    id="password"
+                    name="password"
                     label="Password" 
                     type="password" 
                     placeholder="••••••••" 
-                    defaultValue="mockpassword123"
+                    autoComplete="new-password"
                     required
                   />
                   <Link href="/auth/forgot-password" className="forgot-link">Forgot Password?</Link>
@@ -69,7 +78,7 @@ export default function Login() {
                 <span>OR</span>
               </div>
 
-              <Button type="button" variant="secondary" fullWidth className="google-btn" onClick={() => router.push('/dashboard')}>
+              <Button type="button" variant="secondary" fullWidth className="google-btn" onClick={() => alert('Google Sign In coming soon!')}>
                 Continue with Google
               </Button>
 

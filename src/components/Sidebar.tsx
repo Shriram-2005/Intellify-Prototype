@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Home, BookOpen, PenTool, Video, CheckSquare, Target, BarChart2, TrendingUp, User, ChevronDown, ChevronRight, HelpCircle } from 'lucide-react';
+import { Menu, X, Home, BookOpen, PenTool, Video, CheckSquare, Target, BarChart2, TrendingUp, User, ChevronDown, ChevronRight, HelpCircle, FileText, BookMarked } from 'lucide-react';
 import BorderGlow from './BorderGlow';
 import AnimatedList from './AnimatedList';
 import './Sidebar.css';
@@ -76,10 +76,10 @@ export const Sidebar: React.FC = () => {
             </button>
             {openPracticeModule === 'listening' && (
               <div className="intellify-sidebar-nested-links">
-                <Link href="/practice/listening/section-1" className={`intellify-sidebar-nested-link ${isActive('/practice/listening/section-1') ? 'active' : ''}`}>Section 1</Link>
-                <Link href="/practice/listening/section-2" className={`intellify-sidebar-nested-link ${isActive('/practice/listening/section-2') ? 'active' : ''}`}>Section 2</Link>
-                <Link href="/practice/listening/section-3" className={`intellify-sidebar-nested-link ${isActive('/practice/listening/section-3') ? 'active' : ''}`}>Section 3</Link>
-                <Link href="/practice/listening/section-4" className={`intellify-sidebar-nested-link ${isActive('/practice/listening/section-4') ? 'active' : ''}`}>Section 4</Link>
+                <Link href="/practice/listening/part-1" className={`intellify-sidebar-nested-link ${isActive('/practice/listening/part-1') ? 'active' : ''}`}>Part 1</Link>
+                <Link href="/practice/listening/part-2" className={`intellify-sidebar-nested-link ${isActive('/practice/listening/part-2') ? 'active' : ''}`}>Part 2</Link>
+                <Link href="/practice/listening/part-3" className={`intellify-sidebar-nested-link ${isActive('/practice/listening/part-3') ? 'active' : ''}`}>Part 3</Link>
+                <Link href="/practice/listening/part-4" className={`intellify-sidebar-nested-link ${isActive('/practice/listening/part-4') ? 'active' : ''}`}>Part 4</Link>
               </div>
             )}
           </div>
@@ -141,6 +141,7 @@ export const Sidebar: React.FC = () => {
       )}
     </div>,
 
+    renderLink('/dashboard/resources', <BookMarked size={20} />, 'Resources & Tips'),
     renderLink('/faq', <HelpCircle size={20} />, 'FAQ'),
 
     renderLink('/mock-exam', <Target size={20} />, 'Mock Exams'),

@@ -1,17 +1,105 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import BorderGlow from '@/components/BorderGlow';
-import { Bell, Lock, Globe, Sparkles } from 'lucide-react';
+import { Bell, Lock, Globe, Sparkles, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
 import './profile.css';
 
 export default function ProfilePage() {
+  const [email, setEmail] = useState('');
+  const [userId, setUserId] = useState('');
+  
+  // Profile Fields
+  const [fullName, setFullName] = useState('');
+  const [nationality, setNationality] = useState('');
+  const [targetBandScore, setTargetBandScore] = useState('');
+  const [targetExamDate, setTargetExamDate] = useState('');
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [smsAlerts, setSmsAlerts] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState(true);
+  
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState('');
+  
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function loadUser() {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        setEmail(user.email);
+        setUserId(user.id);
+        
+        // Load profile from DB
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+          
+        if (profile) {
+          setFullName(profile.full_name || '');
+          setNationality(profile.nationality || '');
+          setTargetBandScore(profile.target_band_score ? String(profile.target_band_score) : '');
+          setTargetExamDate(profile.target_exam_date || '');
+          setEmailAlerts(profile.email_alerts ?? true);
+          setSmsAlerts(profile.sms_alerts ?? false);
+          setAiSuggestions(profile.ai_suggestions ?? true);
+        }
+      }
+      setLoading(false);
+    }
+    loadUser();
+  }, [supabase]);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userId) return;
+    
+    setSaving(true);
+    setSaveStatus('');
+    
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        full_name: fullName,
+        nationality: nationality,
+        target_band_score: targetBandScore ? parseFloat(targetBandScore) : null,
+        target_exam_date: targetExamDate || null,
+        email_alerts: emailAlerts,
+        sms_alerts: smsAlerts,
+        ai_suggestions: aiSuggestions
+      })
+      .eq('id', userId);
+      
+    setSaving(false);
+    if (!error) {
+      setSaveStatus('Profile updated successfully!');
+      setTimeout(() => setSaveStatus(''), 3000);
+    } else {
+      setSaveStatus('Error saving profile.');
+    }
+  };
+
+  // Fallbacks for display
+  const nameFromEmail = email ? email.split('@')[0] : 'User';
+  const displayEmail = email || 'Loading...';
+  const displayInitial = (fullName ? fullName : nameFromEmail).charAt(0).toUpperCase() || 'U';
+  const displayName = fullName || nameFromEmail;
+
+  if (loading) {
+    return (
+      <div className="profile-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <RefreshCw size={32} className="spin" color="var(--mid-gray)" />
+      </div>
+    );
+  }
 
   return (
     <div className="profile-page">
@@ -36,40 +124,71 @@ export default function ProfilePage() {
                 colors={['#3498db', '#2980b9', '#74b9ff']}
               >
                 <div className="avatar-large glowing-avatar">
-                  SJ
+                  {displayInitial}
                 </div>
               </BorderGlow>
               
               <div className="profile-info-header">
-                <h3>Student John</h3>
+                <h3>{displayName}</h3>
                 <span className="member-status"><Sparkles size={14} /> Premium Member</span>
                 <Button variant="outline" className="change-avatar-btn">Change Avatar</Button>
               </div>
             </div>
             
-            <form className="profile-form">
+            <form className="profile-form" onSubmit={handleSave}>
               <div className="form-group">
-                <Input label="Full Name" defaultValue="Student John" />
+                <Input 
+                  label="Full Name" 
+                  value={fullName} 
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFullName(e.target.value)} 
+                  placeholder={nameFromEmail}
+                />
               </div>
               <div className="form-group">
-                <Input label="Email Address" type="email" defaultValue="student.john@example.com" />
+                <Input label="Email Address" type="email" value={displayEmail} disabled />
               </div>
               
               <div className="form-row">
                 <div className="form-group">
-                  <Input label="Nationality" defaultValue="India" />
+                  <Input 
+                    label="Nationality" 
+                    value={nationality} 
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNationality(e.target.value)} 
+                  />
                 </div>
                 <div className="form-group">
-                  <Input label="Target Band Score" defaultValue="8.0" />
+                  <Input 
+                    label="Target Band Score" 
+                    value={targetBandScore} 
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTargetBandScore(e.target.value)} 
+                    placeholder="e.g. 8.0"
+                  />
                 </div>
               </div>
               
               <div className="form-group">
-                <Input label="Target Exam Date" type="date" />
+                <Input 
+                  label="Target Exam Date" 
+                  type="date" 
+                  value={targetExamDate} 
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTargetExamDate(e.target.value)} 
+                />
               </div>
               
+              {saveStatus && (
+                <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: saveStatus.includes('Error') ? 'var(--primary-red)' : 'var(--success-color)', fontSize: '14px', fontWeight: 600 }}>
+                  <CheckCircle2 size={16} /> {saveStatus}
+                </div>
+              )}
+
               <div className="form-actions">
-                <Button variant="primary">Save Changes</Button>
+                <Button variant="primary" type="submit" disabled={saving}>
+                  {saving ? (
+                    <><RefreshCw size={16} className="spin" style={{ marginRight: '8px' }} /> Saving...</>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </Button>
               </div>
             </form>
           </Card>

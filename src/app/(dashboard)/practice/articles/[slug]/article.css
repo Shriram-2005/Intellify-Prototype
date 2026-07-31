@@ -1,0 +1,131 @@
+.article-read-container {
+  padding: 32px;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.article-loading-state, .article-not-found {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 100px 20px;
+  text-align: center;
+}
+
+.article-not-found h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--pure-black);
+  margin-bottom: 8px;
+}
+
+.article-not-found p {
+  color: var(--mid-gray);
+  margin-bottom: 24px;
+}
+
+.article-top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--mid-gray);
+  padding: 8px 16px;
+}
+
+.back-btn:hover {
+  color: var(--pure-black);
+  background: var(--background);
+}
+
+.share-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+}
+
+.article-content-wrapper {
+  background: var(--pure-white);
+  border-radius: 24px;
+  padding: 48px;
+  position: relative;
+  border: 1px solid var(--light-gray-border);
+}
+
+.article-header {
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--light-gray-border);
+  padding-bottom: 32px;
+}
+
+.article-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.article-date {
+  display: flex;
+  align-items: center;
+  color: var(--mid-gray);
+  font-size: 13px;
+}
+
+.article-title {
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--pure-black);
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+
+.article-excerpt {
+  font-size: 18px;
+  color: var(--mid-gray);
+  line-height: 1.6;
+}
+
+.article-body {
+  font-size: 16px;
+  color: var(--pure-black);
+  line-height: 1.8;
+}
+
+.article-body p {
+  margin-bottom: 20px;
+}
+
+.article-body h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 32px 0 16px 0;
+  color: var(--pure-black);
+}
+
+.article-body ul, .article-body ol {
+  margin-left: 24px;
+  margin-bottom: 24px;
+}
+
+.article-body li {
+  margin-bottom: 8px;
+}
+
+.article-body a {
+  color: var(--primary-red);
+  text-decoration: underline;
+}
+
+.article-body a:hover {
+  text-decoration: none;
+}
