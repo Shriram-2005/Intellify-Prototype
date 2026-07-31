@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/Input';
@@ -10,7 +10,7 @@ import { login } from '../actions';
 import { AlertCircle } from 'lucide-react';
 import '../auth.css';
 
-export default function Login() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
@@ -90,5 +90,13 @@ export default function Login() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={<div className="auth-page"><div className="auth-split-left"></div><div className="auth-split-right">Loading...</div></div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
