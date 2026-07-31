@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { signout } from '@/app/(marketing)/auth/actions';
 import { Button } from '@/components/Button';
-import { Moon, Sun, Plus, Save, Trash2, Edit, AlertCircle, RefreshCw, X, Eye, Activity, Users, FileText, Database, LogOut } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Plus, Save, Trash2, Edit, AlertCircle, RefreshCw, X, Eye, Activity, Users, FileText, Database, LogOut } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import './admin.css';
 
@@ -271,12 +271,23 @@ export default function AdminCMS() {
           editingTest ? (
             <div className="editor-view">
               <div className="editor-header">
-                <h3>{editingTest.id === 'new' ? 'Create New Test' : 'Edit Test'}</h3>
-                <div className="editor-actions">
-                  <Button variant="ghost" onClick={() => setEditingTest(null)}>Cancel</Button>
-                  <Button variant="primary" onClick={handleSaveTest} style={{ background: 'var(--success-color)' }}>
-                    <Save size={16} style={{ marginRight: '6px' }} /> Save Changes
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <Button variant="ghost" onClick={() => setEditingTest(null)} style={{ padding: '8px', color: 'var(--mid-gray)' }}>
+                    <ArrowLeft size={20} />
                   </Button>
+                  <div>
+                    <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      {editingTest.id === 'new' ? 'Create New Test' : 'Edit Test'}
+                      <span style={{ fontSize: '13px', fontWeight: 'normal', textTransform: 'capitalize', background: 'var(--light-gray)', padding: '2px 8px', borderRadius: '4px' }}>
+                        {editingTest.type}
+                      </span>
+                    </h3>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '6px', color: 'var(--mid-gray)', fontSize: '13px' }}>
+                      <span>{editingTest.title || 'Untitled'}</span>
+                      <span>•</span>
+                      <span style={{ fontFamily: 'monospace' }}>/{editingTest.slug}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
               
@@ -323,6 +334,14 @@ export default function AdminCMS() {
                     onChange={(e) => setEditingTest({...editingTest, content: e.target.value})} 
                     rows={20}
                   />
+                </div>
+                
+                {/* Save Buttons at Bottom */}
+                <div className="editor-actions" style={{ gridColumn: '1 / -1', marginTop: '16px', justifyContent: 'flex-end', borderTop: '1px solid var(--light-gray-border)', paddingTop: '24px' }}>
+                  <Button variant="ghost" onClick={() => setEditingTest(null)}>Cancel</Button>
+                  <Button variant="primary" onClick={handleSaveTest} style={{ background: 'var(--success-color, #10B981)' }}>
+                    <Save size={16} style={{ marginRight: '6px' }} /> Save Changes
+                  </Button>
                 </div>
               </div>
             </div>
@@ -510,6 +529,33 @@ export default function AdminCMS() {
                     value={editingArticle.content} 
                     onChange={e => setEditingArticle({...editingArticle, content: e.target.value})}
                   />
+                </div>
+                
+                {/* Save Buttons at Bottom */}
+                <div className="editor-actions" style={{ gridColumn: '1 / -1', marginTop: '16px', justifyContent: 'flex-end', borderTop: '1px solid var(--light-gray-border)', paddingTop: '24px' }}>
+                  <Button variant="ghost" onClick={() => setEditingArticle(null)}>Cancel</Button>
+                  <Button variant="primary" onClick={async () => {
+                    setSaveStatus('Saving...');
+                    try {
+                      const payload = { ...editingArticle };
+                      if (payload.id === 'new') {
+                        delete payload.id;
+                        const { error } = await supabase.from('articles').insert([payload]);
+                        if (error) throw error;
+                      } else {
+                        const { error } = await supabase.from('articles').update(payload).eq('id', payload.id);
+                        if (error) throw error;
+                      }
+                      setSaveStatus('Saved successfully!');
+                      setTimeout(() => setSaveStatus(''), 3000);
+                      fetchData('articles');
+                      setEditingArticle(null);
+                    } catch (err: any) {
+                      setSaveStatus(`Error: ${err.message}`);
+                    }
+                  }} style={{ background: 'var(--success-color, #10B981)' }}>
+                    <Save size={16} style={{ marginRight: '6px' }} /> Save Changes
+                  </Button>
                 </div>
               </div>
             </div>
