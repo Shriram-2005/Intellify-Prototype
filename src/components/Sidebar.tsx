@@ -9,6 +9,7 @@ import './Sidebar.css';
 
 export const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [isPracticeOpen, setIsPracticeOpen] = useState(false);
   const [openPracticeModule, setOpenPracticeModule] = useState<string | null>(null);
   const [isFaqOpen, setIsFaqOpen] = useState(false);
@@ -22,12 +23,18 @@ export const Sidebar: React.FC = () => {
     if (hour < 12) setGreeting('Good Morning!');
     else if (hour < 17) setGreeting('Good Afternoon!');
     else setGreeting('Good Evening!');
-  }, []);
+    
+    // Auto-expand menus based on current URL
+    if (pathname.includes('/videos')) {
+      setIsVideoOpen(true);
+    }
+  }, [pathname]);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
     if (!isCollapsed) {
       setIsPracticeOpen(false);
+      setIsVideoOpen(false);
     }
   };
 
@@ -46,6 +53,32 @@ export const Sidebar: React.FC = () => {
   const navItems = [
     renderLink('/dashboard', <Home size={20} />, 'Dashboard'),
     renderLink('/modules', <BookOpen size={20} />, 'Modules'),
+    
+    // Sub-menu for Video Lessons
+    <div key="video-group" className={`intellify-sidebar-group ${isCollapsed ? 'collapsed' : ''}`}>
+      <button 
+        className="intellify-sidebar-group-btn" 
+        onClick={() => !isCollapsed && setIsVideoOpen(!isVideoOpen)}
+      >
+        <div className="group-btn-left">
+          <span className="sidebar-icon"><Video size={20} /></span>
+          {!isCollapsed && <span className="sidebar-label">Video Lessons</span>}
+        </div>
+        {!isCollapsed && (
+          <ChevronDown size={16} className={`chevron-icon ${isVideoOpen ? 'open' : ''}`} />
+        )}
+      </button>
+      
+      {!isCollapsed && isVideoOpen && (
+        <div className="intellify-sidebar-sublinks">
+          <Link href="/dashboard/videos/overview" className={`intellify-sidebar-nested-link ${isActive('/dashboard/videos/overview') ? 'active' : ''}`}>Overview</Link>
+          <Link href="/dashboard/videos/listening" className={`intellify-sidebar-nested-link ${isActive('/dashboard/videos/listening') ? 'active' : ''}`}>Listening</Link>
+          <Link href="/dashboard/videos/reading" className={`intellify-sidebar-nested-link ${isActive('/dashboard/videos/reading') ? 'active' : ''}`}>Reading</Link>
+          <Link href="/dashboard/videos/writing" className={`intellify-sidebar-nested-link ${isActive('/dashboard/videos/writing') ? 'active' : ''}`}>Writing</Link>
+          <Link href="/dashboard/videos/speaking" className={`intellify-sidebar-nested-link ${isActive('/dashboard/videos/speaking') ? 'active' : ''}`}>Speaking</Link>
+        </div>
+      )}
+    </div>,
     
     // Sub-menu for Practice
     <div key="practice-group" className={`intellify-sidebar-group ${isCollapsed ? 'collapsed' : ''}`}>

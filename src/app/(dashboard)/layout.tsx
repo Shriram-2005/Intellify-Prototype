@@ -19,6 +19,19 @@ export default async function DashboardLayout({
   const email = user?.email || 'student@intellify.com';
   const initial = email.charAt(0).toUpperCase();
 
+  // Fetch the user's profile to get their exam track
+  let targetExam = 'Academic';
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('target_exam')
+      .eq('id', user.id)
+      .single();
+    if (profile?.target_exam) {
+      targetExam = profile.target_exam;
+    }
+  }
+
   return (
     <div className="intellify-dashboard-layout">
       <Sidebar />
@@ -58,6 +71,9 @@ export default async function DashboardLayout({
               colors={['#E74C3C', '#C0392B', '#ff6b5b']}
             >
               <div className="dashboard-profile-pill">
+                <span className="profile-plan-badge" style={{ background: 'var(--light-gray)', color: 'var(--mid-gray)', marginRight: '8px', fontSize: '11px' }}>
+                  {targetExam}
+                </span>
                 <span className="profile-email" style={{ color: 'var(--pure-black)' }}>{email}</span>
                 <Link href="/dashboard/profile" style={{ textDecoration: 'none' }}>
                   <div className="profile-avatar" style={{ cursor: 'pointer' }}>{initial}</div>

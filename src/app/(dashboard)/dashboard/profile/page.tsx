@@ -7,6 +7,7 @@ import { Button } from '@/components/Button';
 import BorderGlow from '@/components/BorderGlow';
 import { Bell, Lock, Globe, Sparkles, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
+import { useRouter } from 'next/navigation';
 import './profile.css';
 
 export default function ProfilePage() {
@@ -18,15 +19,19 @@ export default function ProfilePage() {
   const [nationality, setNationality] = useState('');
   const [targetBandScore, setTargetBandScore] = useState('');
   const [targetExamDate, setTargetExamDate] = useState('');
+  const [targetExam, setTargetExam] = useState('Academic');
   const [emailAlerts, setEmailAlerts] = useState(true);
-  const [smsAlerts, setSmsAlerts] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState(true);
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordStatus, setPasswordStatus] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState('');
   
   const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
     async function loadUser() {
@@ -49,8 +54,8 @@ export default function ProfilePage() {
           setTargetBandScore(profile.target_band_score ? String(profile.target_band_score) : '');
           setTargetExamDate(profile.target_exam_date || '');
           setEmailAlerts(profile.email_alerts ?? true);
-          setSmsAlerts(profile.sms_alerts ?? false);
           setAiSuggestions(profile.ai_suggestions ?? true);
+          if (profile.target_exam) setTargetExam(profile.target_exam);
         }
       }
       setLoading(false);
@@ -73,14 +78,15 @@ export default function ProfilePage() {
         target_band_score: targetBandScore ? parseFloat(targetBandScore) : null,
         target_exam_date: targetExamDate || null,
         email_alerts: emailAlerts,
-        sms_alerts: smsAlerts,
-        ai_suggestions: aiSuggestions
+        ai_suggestions: aiSuggestions,
+        target_exam: targetExam
       })
       .eq('id', userId);
       
     setSaving(false);
     if (!error) {
       setSaveStatus('Profile updated successfully!');
+      router.refresh();
       setTimeout(() => setSaveStatus(''), 3000);
     } else {
       setSaveStatus('Error saving profile.');
@@ -150,6 +156,34 @@ export default function ProfilePage() {
               
               <div className="form-row">
                 <div className="form-group">
+                  <label style={{ display: 'block', marginBottom: '12px', fontSize: '13px', fontWeight: 600, color: 'var(--mid-gray)' }}>Target Exam Track</label>
+                  <div style={{ display: 'inline-flex', background: 'var(--background)', borderRadius: '999px', padding: '6px', border: '1px solid var(--light-gray-border)' }}>
+                    <div 
+                      onClick={() => setTargetExam('Academic')}
+                      style={{ 
+                        padding: '10px 24px', borderRadius: '999px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s ease',
+                        background: targetExam === 'Academic' ? 'var(--pure-black)' : 'transparent',
+                        color: targetExam === 'Academic' ? 'var(--pure-white)' : 'var(--mid-gray)',
+                        boxShadow: targetExam === 'Academic' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none'
+                      }}>
+                      IELTS Academic
+                    </div>
+                    <div 
+                      onClick={() => setTargetExam('General')}
+                      style={{ 
+                        padding: '10px 24px', borderRadius: '999px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s ease',
+                        background: targetExam === 'General' ? 'var(--pure-black)' : 'transparent',
+                        color: targetExam === 'General' ? 'var(--pure-white)' : 'var(--mid-gray)',
+                        boxShadow: targetExam === 'General' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none'
+                      }}>
+                      General Training
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
                   <Input 
                     label="Nationality" 
                     value={nationality} 
@@ -215,21 +249,6 @@ export default function ProfilePage() {
                 <span className="toggle-slider"></span>
               </label>
             </div>
-            
-            <div className="setting-row">
-              <div className="setting-info">
-                <h4>SMS Reminders</h4>
-                <p>Get text reminders for upcoming mock exams.</p>
-              </div>
-              <label className="toggle-switch">
-                <input 
-                  type="checkbox" 
-                  checked={smsAlerts} 
-                  onChange={(e) => setSmsAlerts(e.target.checked)} 
-                />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
           </Card>
 
           <Card className="settings-card premium-card">
@@ -259,8 +278,28 @@ export default function ProfilePage() {
               <Lock size={20} className="settings-icon" />
               <h3>Security</h3>
             </div>
-            <p className="security-desc">Ensure your account is secure. Update your password if you suspect unauthorized access.</p>
-            <Button variant="outline" fullWidth>Change Password</Button>
+            <p className="security-desc" style={{ marginBottom: '16px' }}>Ensure your account is secure. We will send a secure password reset link directly to your registered email address.</p>
+            {passwordStatus && (
+              <div style={{ marginBottom: '16px', fontSize: '14px', fontWeight: 600, color: passwordStatus.includes('Error') ? 'var(--primary-red)' : 'var(--success-color)' }}>
+                {passwordStatus}
+              </div>
+            )}
+            <Button variant="outline" fullWidth onClick={async () => {
+              setPasswordLoading(true);
+              setPasswordStatus('');
+              const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/auth/update-password`,
+              });
+              setPasswordLoading(false);
+              if (error) {
+                setPasswordStatus(`Error: ${error.message}`);
+              } else {
+                setPasswordStatus('A password reset link has been sent to your email!');
+                setTimeout(() => setPasswordStatus(''), 5000);
+              }
+            }} disabled={passwordLoading}>
+              {passwordLoading ? 'Sending Email...' : 'Send Password Reset Email'}
+            </Button>
           </Card>
         </div>
       </div>

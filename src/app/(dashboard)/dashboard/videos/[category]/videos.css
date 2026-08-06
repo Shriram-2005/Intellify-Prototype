@@ -1,0 +1,149 @@
+.video-category-page {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.category-header {
+  margin-bottom: 40px;
+}
+
+.category-header h1 {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--pure-black);
+  margin-bottom: 8px;
+}
+
+.category-header p {
+  font-size: 16px;
+  color: var(--mid-gray);
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.video-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.video-card-link:hover {
+  transform: translateY(-4px);
+}
+
+.video-card {
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.video-thumbnail-placeholder {
+  background: var(--light-gray);
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mid-gray);
+  transition: all 0.3s ease;
+}
+
+.video-card-link:hover .video-thumbnail-placeholder {
+  color: var(--primary-blue);
+  background: rgba(52, 152, 219, 0.1);
+}
+
+.video-card-content {
+  padding: 20px;
+  flex-grow: 1;
+}
+
+.video-card-content h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--pure-black);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.video-desc {
+  font-size: 14px;
+  color: var(--mid-gray);
+  line-height: 1.5;
+}
+
+.loading-state, .empty-state {
+  text-align: center;
+  padding: 60px;
+  color: var(--mid-gray);
+  font-size: 18px;
+  background: var(--pure-white);
+  border-radius: 24px;
+  border: 1px solid var(--light-gray-border);
+}
+
+/* Watch Page */
+.video-watch-page {
+  padding: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.video-title-header {
+  margin-bottom: 24px;
+}
+
+.video-title-header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--pure-black);
+  margin-bottom: 12px;
+}
+
+.video-metadata {
+  display: flex;
+  gap: 16px;
+  color: var(--mid-gray);
+  font-size: 14px;
+}
+
+.video-category-badge {
+  background: var(--light-gray);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.video-player-wrapper {
+  background: #000;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  margin-bottom: 32px;
+  aspect-ratio: 16 / 9;
+}
+
+.video-description-box {
+  padding: 32px;
+}
+
+.video-description-box h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--pure-black);
+}
+
+.video-description-box p {
+  color: var(--mid-gray);
+  line-height: 1.6;
+  font-size: 15px;
+}

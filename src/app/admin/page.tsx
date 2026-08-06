@@ -9,7 +9,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
 import './admin.css';
 
 export default function AdminCMS() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'tests' | 'users' | 'responses' | 'articles' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'tests' | 'users' | 'responses' | 'articles' | 'tracks' | 'videos' | 'settings'>('overview');
   const [filterModule, setFilterModule] = useState('all');
   
   // Data States
@@ -17,6 +17,7 @@ export default function AdminCMS() {
   const [users, setUsers] = useState<any[]>([]);
   const [responses, setResponses] = useState<any[]>([]);
   const [articles, setArticles] = useState<any[]>([]);
+  const [videos, setVideos] = useState<any[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState('light');
@@ -24,6 +25,7 @@ export default function AdminCMS() {
   // Edit States
   const [editingTest, setEditingTest] = useState<any>(null);
   const [editingArticle, setEditingArticle] = useState<any>(null);
+  const [editingVideo, setEditingVideo] = useState<any>(null);
   const [saveStatus, setSaveStatus] = useState('');
   
   // Modal State
@@ -60,13 +62,15 @@ export default function AdminCMS() {
     const fetchUsers = supabase.from('profiles').select('*').eq('role', 'user').order('created_at', { ascending: false });
     const fetchResponses = supabase.from('user_responses').select('*, profiles(email), tests(title, type)').order('created_at', { ascending: false });
     const fetchArticles = supabase.from('articles').select('*').order('created_at', { ascending: false });
+    const fetchVideos = supabase.from('videos').select('*').order('created_at', { ascending: false });
 
     if (tab === 'overview') {
-      const [tRes, uRes, rRes, aRes] = await Promise.all([fetchTests, fetchUsers, fetchResponses, fetchArticles]);
+      const [tRes, uRes, rRes, aRes, vRes] = await Promise.all([fetchTests, fetchUsers, fetchResponses, fetchArticles, fetchVideos]);
       if (tRes.data) setTests(tRes.data);
       if (uRes.data) setUsers(uRes.data);
       if (rRes.data) setResponses(rRes.data);
       if (aRes.data) setArticles(aRes.data);
+      if (vRes.data) setVideos(vRes.data);
     } else if (tab === 'tests') {
       const { data, error } = await fetchTests;
       if (!error) setTests(data || []);
@@ -79,6 +83,9 @@ export default function AdminCMS() {
     } else if (tab === 'articles') {
       const { data, error } = await fetchArticles;
       if (!error) setArticles(data || []);
+    } else if (tab === 'videos') {
+      const { data, error } = await fetchVideos;
+      if (!error) setVideos(data || []);
     }
     setLoading(false);
   };
@@ -127,6 +134,40 @@ export default function AdminCMS() {
     if (!error) fetchData('tests');
   };
 
+  // --- VIDEOS LOGIC ---
+  const handleSaveVideo = async () => {
+    setSaveStatus('Saving...');
+    try {
+      const payload = {
+        title: editingVideo.title,
+        description: editingVideo.description,
+        mux_playback_id: editingVideo.mux_playback_id,
+        category: editingVideo.category
+      };
+      
+      if (!editingVideo.id) {
+        const { error } = await supabase.from('videos').insert([payload]);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('videos').update(payload).eq('id', editingVideo.id);
+        if (error) throw error;
+      }
+      
+      setSaveStatus('Saved successfully!');
+      setTimeout(() => setSaveStatus(''), 3000);
+      setEditingVideo(null);
+      fetchData('videos');
+    } catch (err: any) {
+      setSaveStatus(`Error: ${err.message}`);
+    }
+  };
+
+  const handleDeleteVideo = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this video?')) return;
+    const { error } = await supabase.from('videos').delete().eq('id', id);
+    if (!error) fetchData('videos');
+  };
+
   // --- USERS LOGIC ---
 
   const handleDeleteUser = async (userId: string) => {
@@ -145,7 +186,9 @@ export default function AdminCMS() {
         
         <nav className="cms-nav">
           <button className={`nav-item ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>Overview Analytics</button>
+          <button className={`nav-item ${activeTab === 'tracks' ? 'active' : ''}`} onClick={() => setActiveTab('tracks')}>Exam Tracks (Demographics)</button>
           <button className={`nav-item ${activeTab === 'tests' ? 'active' : ''}`} onClick={() => setActiveTab('tests')}>Tests Database</button>
+          <button className={`nav-item ${activeTab === 'videos' ? 'active' : ''}`} onClick={() => setActiveTab('videos')}>Video Lessons</button>
           <button className={`nav-item ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>User Management</button>
           <button className={`nav-item ${activeTab === 'responses' ? 'active' : ''}`} onClick={() => setActiveTab('responses')}>User Responses</button>
           <button className={`nav-item ${activeTab === 'articles' ? 'active' : ''}`} onClick={() => setActiveTab('articles')}>Articles & Resources</button>
@@ -168,6 +211,7 @@ export default function AdminCMS() {
           <h1>
             {activeTab === 'overview' && 'Overview Analytics'}
             {activeTab === 'tests' && 'Test Management'}
+            {activeTab === 'videos' && 'Video Lessons Management'}
             {activeTab === 'users' && 'User Management'}
             {activeTab === 'responses' && 'User Responses'}
             {activeTab === 'articles' && 'Articles & Resources'}
@@ -197,6 +241,13 @@ export default function AdminCMS() {
               </select>
               <Button variant="primary" onClick={() => setEditingTest({ id: 'new', type: 'reading', slug: 'passage-new', title: 'New Test', meta: '', content: JSON.stringify({}, null, 2) })} style={{ display: 'flex', gap: '8px', alignItems: 'center', background: 'var(--primary-red)' }}>
                 <Plus size={16} /> Create Test
+              </Button>
+            </div>
+          )}
+          {activeTab === 'videos' && !editingVideo && (
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <Button variant="primary" onClick={() => setEditingVideo({ id: '', title: '', description: '', mux_playback_id: '', category: 'overview' })} style={{ display: 'flex', gap: '8px', alignItems: 'center', background: 'var(--primary-red)' }}>
+                <Plus size={16} /> Add Video Lesson
               </Button>
             </div>
           )}
@@ -267,6 +318,43 @@ export default function AdminCMS() {
         )}
 
         {/* TESTS VIEW */}
+        {activeTab === 'tracks' && (
+          <div className="overview-grid">
+            <div className="stat-card full-width">
+              <h3>User Demographics (Academic vs General)</h3>
+              <div style={{ height: '300px', width: '100%' }}>
+                {loading ? <p>Loading demographics...</p> : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie 
+                        data={[
+                          { name: 'Academic', value: users.filter(u => u.target_exam === 'Academic' || !u.target_exam).length },
+                          { name: 'General', value: users.filter(u => u.target_exam === 'General').length }
+                        ]} 
+                        dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label
+                      >
+                        <Cell fill="#4f46e5" />
+                        <Cell fill="#10b981" />
+                      </Pie>
+                      <RechartsTooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#4f46e5' }}></div>
+                  <span style={{ fontSize: '14px', color: 'var(--mid-gray)' }}>Academic Students ({users.filter(u => u.target_exam === 'Academic' || !u.target_exam).length})</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#10b981' }}></div>
+                  <span style={{ fontSize: '14px', color: 'var(--mid-gray)' }}>General Training ({users.filter(u => u.target_exam === 'General').length})</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'tests' && (
           editingTest ? (
             <div className="editor-view">
@@ -308,6 +396,15 @@ export default function AdminCMS() {
                     <option value="listening">Listening</option>
                     <option value="writing">Writing</option>
                     <option value="speaking">Speaking</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>Target Exam</label>
+                  <select value={editingTest.exam_category || 'Common'} onChange={(e) => setEditingTest({...editingTest, exam_category: e.target.value})}>
+                    <option value="Common">Common (Both)</option>
+                    <option value="Academic">Academic Only</option>
+                    <option value="General">General Training Only</option>
                   </select>
                 </div>
                 
@@ -358,6 +455,7 @@ export default function AdminCMS() {
                     <tr>
                       <th>Title</th>
                       <th>Module</th>
+                      <th>Track</th>
                       <th>Slug</th>
                       <th>Actions</th>
                     </tr>
@@ -367,6 +465,7 @@ export default function AdminCMS() {
                       <tr key={test.id}>
                         <td><strong>{test.title}</strong></td>
                         <td><span className={`badge badge-${test.type}`}>{test.type}</span></td>
+                        <td>{test.exam_category || 'Common'}</td>
                         <td><code>{test.slug}</code></td>
                         <td>
                           <div className="action-buttons">
@@ -463,6 +562,110 @@ export default function AdminCMS() {
               </table>
             )}
           </div>
+        )}
+
+        {/* VIDEOS VIEW */}
+        {activeTab === 'videos' && (
+          editingVideo ? (
+            <div className="editor-view">
+              <div className="editor-header">
+                <h2>{editingVideo.id ? 'Edit Video Lesson' : 'Add New Video Lesson'}</h2>
+                <div className="editor-actions">
+                  <Button variant="ghost" onClick={() => setEditingVideo(null)}>Cancel</Button>
+                  <Button variant="primary" onClick={handleSaveVideo} style={{ background: 'var(--success-color, #10B981)' }}>
+                    <Save size={16} /> Save Video
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="editor-grid">
+                <div className="form-group">
+                  <label>Title</label>
+                  <input type="text" value={editingVideo.title} onChange={(e) => setEditingVideo({...editingVideo, title: e.target.value})} />
+                </div>
+                
+                <div className="form-group">
+                  <label>Category</label>
+                  <select value={editingVideo.category} onChange={(e) => setEditingVideo({...editingVideo, category: e.target.value})}>
+                    <option value="overview">Overview</option>
+                    <option value="reading">Reading</option>
+                    <option value="listening">Listening</option>
+                    <option value="writing">Writing</option>
+                    <option value="speaking">Speaking</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>Mux Playback ID</label>
+                  <input type="text" value={editingVideo.mux_playback_id} onChange={(e) => setEditingVideo({...editingVideo, mux_playback_id: e.target.value})} placeholder="e.g. j2X789Y..." />
+                </div>
+                
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label>Description (Optional)</label>
+                  <textarea 
+                    value={editingVideo.description || ''} 
+                    onChange={(e) => setEditingVideo({...editingVideo, description: e.target.value})}
+                    rows={4}
+                  />
+                </div>
+                
+                {saveStatus && (
+                  <div className="save-status" style={{ gridColumn: '1 / -1', color: saveStatus.includes('Error') ? 'var(--primary-red)' : 'var(--success-color)' }}>
+                    {saveStatus}
+                  </div>
+                )}
+                
+                <div className="editor-actions" style={{ gridColumn: '1 / -1', marginTop: '16px', justifyContent: 'flex-end', display: 'flex', gap: '12px' }}>
+                  <Button variant="ghost" onClick={() => setEditingVideo(null)}>Cancel</Button>
+                  <Button variant="primary" onClick={handleSaveVideo} style={{ background: 'var(--success-color, #10B981)' }}>
+                    <Save size={16} /> Save Video
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="table-container">
+              {loading ? (
+                <div className="loading-state">
+                  <RefreshCw className="spin" size={24} />
+                  <span>Loading videos...</span>
+                </div>
+              ) : (
+                <table className="cms-table">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Category</th>
+                      <th>Mux ID</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {videos.map(video => (
+                      <tr key={video.id}>
+                        <td><strong>{video.title}</strong></td>
+                        <td style={{ textTransform: 'capitalize' }}>{video.category}</td>
+                        <td><code>{video.mux_playback_id}</code></td>
+                        <td>
+                          <div className="action-buttons">
+                            <button className="action-btn edit" onClick={() => setEditingVideo(video)}><Edit size={16} /></button>
+                            <button className="action-btn delete" onClick={() => handleDeleteVideo(video.id)}><Trash2 size={16} /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {videos.length === 0 && (
+                      <tr>
+                        <td colSpan={4} style={{ textAlign: 'center', padding: '40px', color: 'var(--mid-gray)' }}>
+                          No videos found. Click "Add Video Lesson" to create one.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )
         )}
 
         {/* ARTICLES VIEW */}
